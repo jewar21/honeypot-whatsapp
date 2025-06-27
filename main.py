@@ -38,18 +38,28 @@ def index():
     user_agent = request.headers.get('User-Agent')
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    log_entry = f"[{timestamp}] IP: {ip}, User-Agent: {user_agent}"
+    try:
+        geo = requests.get(f"http://ip-api.com/json/{ip}").json()
+        location = f"{geo.get('country')}, {geo.get('regionName')}, {geo.get('city')}"
+    except:
+        location = "Ubicación desconocida"
+
+    log_entry = (
+        f"🕵️ Nuevo acceso al honeypot:\n"
+        f"📆 {timestamp}\n"
+        f"🌐 IP: {ip}\n"
+        f"📍 Ubicación: {location}\n"
+        f"🧠 User-Agent: {user_agent}"
+    )
+
     print(log_entry)
 
-    # Guardar en archivo local
     with open("honeypot_log.txt", "a") as log_file:
-        log_file.write(log_entry + "\n")
+        log_file.write(log_entry + "\\n")
 
-    # Enviar a Telegram
     send_telegram_message(log_entry)
 
     return render_template_string(HTML)
 
 # Ejecutar el servidor en Replit
 app.run(host='0.0.0.0', port=81)
-
