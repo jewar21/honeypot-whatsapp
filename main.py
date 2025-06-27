@@ -1,22 +1,17 @@
 from flask import Flask, request, render_template_string
 from datetime import datetime
-import logging
 
 app = Flask(__name__)
 
-# Configura el logger
-logging.basicConfig(filename='honeypot_log.txt', level=logging.INFO)
-
-# Página señuelo
 HTML = """
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Verificación de cuenta</title>
+    <title>Verificación</title>
 </head>
 <body>
     <h2>Estamos verificando tu acceso</h2>
-    <p>Por favor espera un momento...</p>
+    <p>Espera un momento mientras validamos tu identidad...</p>
 </body>
 </html>
 """
@@ -27,11 +22,13 @@ def index():
     user_agent = request.headers.get('User-Agent')
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    log_entry = f"[{timestamp}] IP: {ip}, Navegador: {user_agent}"
-    print(log_entry)
-    logging.info(log_entry)
+    log_entry = f"[{timestamp}] IP: {ip}, User-Agent: {user_agent}"
+    print(log_entry)  # Esto aparece en la consola de Replit
+
+    # También podrías guardar en archivo si lo prefieres:
+    with open("honeypot_log.txt", "a") as log_file:
+        log_file.write(log_entry + "\n")
 
     return render_template_string(HTML)
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+app.run(host='0.0.0.0', port=81)
